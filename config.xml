@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>woovi</name>
+	<displayName><![CDATA[Woovi]]></displayName>
+	<version><![CDATA[0.0.1]]></version>
+	<description><![CDATA[Woovi module for payments using open pix]]></description>
+	<author><![CDATA[Jeferson Eiji]]></author>
+	<tab><![CDATA[payments_gateways]]></tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+</module>
