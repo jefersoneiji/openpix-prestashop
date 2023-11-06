@@ -42,8 +42,9 @@ To run locally:
    ```cmd
    php composer.phar install
    ```
- 4. Drag the contents of this folder inside the `modules/woovi` folder after docker is running  
-
+ 4. Drag the contents of this folder inside the `modules/woovi` folder after docker is running
+ 5. Now the module is available inside the back-office module manager tab, click install
+    
 ### To access Store (Front-Office)
   ```http
   http://localhost:8080
