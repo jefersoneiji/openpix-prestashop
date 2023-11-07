@@ -53,6 +53,16 @@ To run locally:
  ```http
  http://localhost:8080/admin4577
  ```
+### Credentials for Admin dashboard
+
+email
+```cmd
+demo@prestashop.com
+```
+password
+```cmd
+prestashop_demo
+```
 
 ## License
 
