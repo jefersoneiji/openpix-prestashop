@@ -1,0 +1,45 @@
+version: '3'
+services:
+  mysql:
+    container_name: some-mysql
+    image: mysql:5.7
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: prestashop
+    networks:
+      - prestashop_network
+    volumes:
+      - dbdata:/var/lib/mysql
+  prestashop:
+    container_name: prestashop
+    image: prestashop/prestashop:latest
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - 8080:80
+    environment:
+      DB_SERVER: some-mysql
+      DB_NAME: prestashop
+      DB_USER: root
+      DB_PASSWD: admin
+      PS_FOLDER_ADMIN: admin4577
+      PS_FOLDER_INSTALL: install4577
+      PS_INSTALL_AUTO: 1
+      PS_DOMAIN: localhost:8080
+    networks:
+      - prestashop_network
+    volumes:
+      - type: bind
+        source: ./modules/woovi # local path to the module
+        target: /var/www/html/modules/woovi # path to be mounted in the container
+      - type: bind
+        source: ./themes/myTheme # local path to the theme
+        target:  /var/www/html/themes/myTheme # path to be mounted in the container
+      - psdata:/var/www/html
+networks:
+  prestashop_network:
+volumes:
+  psdata:
+  dbdata:
