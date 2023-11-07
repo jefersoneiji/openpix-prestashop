@@ -53,7 +53,7 @@ class Woovi extends PaymentModule
         $this->displayName = $this->l('Woovi');
         $this->description = $this->l('Woovi module for payments using open pix');
 
-        $this->limited_countries = array('FR');
+        $this->limited_countries = array('BR');
 
         $this->limited_currencies = array('EUR');
 
