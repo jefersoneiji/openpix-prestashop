@@ -89,7 +89,7 @@ class Woovi extends PaymentModule
             return false;
         }
 
-        Configuration::updateValue('WOOVI_LIVE_MODE', false);
+        Configuration::updateValue('WOOVI_APP_ID_OPENPIX', '');
 
         return parent::install() &&
             $this->registerHook('header') &&
@@ -102,7 +102,7 @@ class Woovi extends PaymentModule
 
     public function uninstall()
     {
-        Configuration::deleteByName('WOOVI_LIVE_MODE');
+        Configuration::deleteByName('WOOVI_APP_ID_OPENPIX');
 
         return parent::uninstall() &&
             (bool) Configuration::deleteByName(static::CONFIG_PO_EXTERNAL_ENABLED);
@@ -163,41 +163,24 @@ class Woovi extends PaymentModule
         return array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Settings'),
+                    'title' => $this->l('Set up'),
                     'icon' => 'icon-cogs',
                 ),
                 'input' => array(
                     array(
-                        'type' => 'switch',
-                        'label' => $this->l('Live mode'),
-                        'name' => 'WOOVI_LIVE_MODE',
-                        'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
-                        'values' => array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->l('Enabled')
-                            ),
-                            array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->l('Disabled')
-                            )
-                        ),
-                    ),
-                    array(
-                        'col' => 3,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'WOOVI_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
+                        'label' => $this->l('AppID OpenPix'),
+                        'name' => 'WOOVI_APP_ID_OPENPIX',
                     ),
                     array(
-                        'type' => 'password',
-                        'name' => 'WOOVI_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
+                        'type' => 'text',
+                        'label' => $this->l('Label Title'),
+                        'name' => 'WOOVI_LABEL_TITLE',
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->l('Label Description'),
+                        'name' => 'WOOVI_LABEL_DESCRIPTION',
                     ),
                 ),
                 'submit' => array(
@@ -213,9 +196,9 @@ class Woovi extends PaymentModule
     protected function getConfigFormValues()
     {
         return array(
-            'WOOVI_LIVE_MODE' => Configuration::get('WOOVI_LIVE_MODE', true),
-            'WOOVI_ACCOUNT_EMAIL' => Configuration::get('WOOVI_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'WOOVI_ACCOUNT_PASSWORD' => Configuration::get('WOOVI_ACCOUNT_PASSWORD', null),
+            'WOOVI_APP_ID_OPENPIX' => Configuration::get('WOOVI_APP_ID_OPENPIX', ''),
+            'WOOVI_LABEL_TITLE' => Configuration::get('WOOVI_LABEL_TITLE', 'Pix payment by Woovi'),
+            'WOOVI_LABEL_DESCRIPTION' => Configuration::get('WOOVI_LABEL_DESCRIPTION', 'tax free payments using pix'),
         );
     }
 
@@ -311,7 +294,7 @@ class Woovi extends PaymentModule
             return;
         }
         $option = new \PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-        $option->setCallToActionText($this->l('Pay External'))
+        $option->setCallToActionText($this->l(Configuration::get('WOOVI_LABEL_TITLE')))
             ->setAction($this->context->link->getModuleLink($this->name, 'external', [], true))
             ->setAdditionalInformation($this->context->smarty->fetch('module:woovi/views/templates/front/paymentOptionExternal.tpl'))
             ->setInputs([

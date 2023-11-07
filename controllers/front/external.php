@@ -68,7 +68,7 @@ class WooviExternalModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        $appId = "Q2xpZW50X0lkXzI4MTI1ZGU2LWFjOGUtNDdkOC1iYzg1LTMxYTMwODQ2YTVlYTpDbGllbnRfU2VjcmV0X29BTmFFb2xLMG03SzV0alhZZzRkYlJuUGRVYWtTS3lzMzBlSzhuZmlab1U9";
+        $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
         $uuid = Uuid::uuid4();
         $this->context->smarty->assign([
             'action' => $this->context->link->getModuleLink($this->module->name, 'validation', ['option' => 'external'], true),
@@ -96,9 +96,9 @@ class WooviExternalModuleFrontController extends ModuleFrontController
 
         $cart_total = $this->context->cart->getOrderTotal(true, Cart::BOTH);
 
-        PrestaShopLogger::addLog(strval($cart_total), 1);
-        PrestaShopLogger::addLog($uuid->toString(), 1);
-        PrestaShopLogger::addLog($arr_json, 1);
+        // PrestaShopLogger::addLog(strval($cart_total), 1);
+        // PrestaShopLogger::addLog($uuid->toString(), 1);
+        // PrestaShopLogger::addLog($arr_json, 1);
 
     }
 

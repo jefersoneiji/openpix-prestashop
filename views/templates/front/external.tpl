@@ -22,7 +22,6 @@
 {block name="content"}
   <section id="woovi-external" class="card card-block mb-2">
     <p>{l s='This page maybe simulate an external payment gateway : Order will be created with OrderState "Remote payment accepted".' mod='woovi'}</p>
-    <p>{l s=$action}</p>
     <button onclick="displayOpenPixModal()">
       Clique para abrir o modal
     </button>
@@ -32,7 +31,7 @@
         window.$openpix = window.$openpix || []; // priorize o objeto já instanciado
         
         let configObj ={};
-        configObj['appID']="{$appId};
+        configObj['appID']="{$appId}";
         window.$openpix.push(['config', configObj]);
 
         let pixObj = {};
