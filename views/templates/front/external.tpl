@@ -21,49 +21,19 @@
 
 {block name="content"}
   <section id="woovi-external" class="card card-block mb-2">
-    <p>{l s='This page maybe simulate an external payment gateway : Order will be created with OrderState "Remote payment accepted".' mod='woovi'}</p>
-    <button onclick="displayOpenPixModal()">
-      Clique para abrir o modal
-    </button>
+    <form action={$action} method="post" class="form-horizontal mb-1">
+        <div class='text-sm-center'>
+        <button type='submit' class="btn btn-primary">
+            {l s='Confirm Order'}
+        </button>
+       </div> 
+    </form>
+     <div 
+        id="openpix-order"
+        data-appid={$appId}
+        data-correlationid={$uuid} 
+      />
     <script src="https://plugin.openpix.com.br/v1/openpix.js" async></script>
-    <script>
-      function displayOpenPixModal() {
-        window.$openpix = window.$openpix || []; // priorize o objeto já instanciado
-        
-        let configObj ={};
-        configObj['appID']="{$appId}";
-        window.$openpix.push(['config', configObj]);
-
-        let pixObj = {};
-        pixObj['correlationID'] = "{$uuid}";
-        pixObj['value'] = 100;
-        window.$openpix.push([
-          'pix',
-          pixObj,
-        ]);
-
-        const logEvents = (e) => {
-          if (e.type === 'CHARGE_COMPLETED') {
-            console.log('a cobrança foi paga');
-          }
-
-          if (e.type === 'CHARGE_EXPIRED') {
-            console.log('a cobrança foi expirada');
-          }
-
-          if (e.type === 'ON_CLOSE') {
-            console.log('o modal da cobrança foi fechado');
-          }
-        }
-        
-      // only register event listener when plugin is already loaded
-        if(!!window.$openpix?.addEventListener) {
-          const unsubscribe = window.$openpix.addEventListener(logEvents);
-
-          // parar de escutar os eventos
-          // unsubscribe();
-        }
-      }
     </script>
   </section>
 {/block}

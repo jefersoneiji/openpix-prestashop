@@ -24,7 +24,7 @@
 *}
 
 {if (isset($status) == true) && ($status == 'ok')}
-<h3>{l s='Your order on %s is complete.' sprintf=$shop_name mod='woovi'}</h3>
+<h3>{l s='After the order is paid a payment invoice will be send.' mod='woovi'}</h3>
 <p>
 	<br />- {l s='Amount' mod='woovi'} : <span class="price"><strong>{$total|escape:'htmlall':'UTF-8'}</strong></span>
 	<br />- {l s='Reference' mod='woovi'} : <span class="reference"><strong>{$reference|escape:'html':'UTF-8'}</strong></span>
