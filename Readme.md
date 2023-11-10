@@ -21,11 +21,7 @@ and you have admin access to the terminal.
 ### Installing
 
 To run locally:
-1. Access this project root level and spin up docker
-   ```cmd
-   docker compose up
-   ```
-2. Still in root level... install composer by running each script separately and in this order
+1. In root level... install composer by running each script separately and in this order
    ```cmd
    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
    ```
@@ -38,12 +34,14 @@ To run locally:
    ```cmd
    php -r "unlink('composer-setup.php');"
    ``` 
-3. Then install composer dependencies
+2. Then install composer dependencies
    ```cmd
    php composer.phar install
    ```
- 4. Drag the contents of this folder inside the `modules/woovi` folder after docker is running
- 5. Now the module is available inside the back-office module manager tab, click install
+3. Finally spin up docker
+   ```cmd
+   docker compose up
+   ```
     
 ### To access Store (Front-Office)
   ```http
@@ -63,6 +61,7 @@ password
 ```cmd
 prestashop_demo
 ```
+#### PAY ATTENTION TO THIS: The Woovi payment method will only show in cart IF THE ORDER'S DELIVERY COUNTRY AND MODULE'S COUNTRY ARE EQUAL. Pick France.
 
 ## License
 
