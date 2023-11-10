@@ -28,15 +28,13 @@ services:
       PS_FOLDER_INSTALL: install4577
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:8080
+      PS_COUNTRY: FR
     networks:
       - prestashop_network
     volumes:
       - type: bind
-        source: ./modules/woovi # local path to the module
+        source: ./ # local path to the module
         target: /var/www/html/modules/woovi # path to be mounted in the container
-      - type: bind
-        source: ./themes/myTheme # local path to the theme
-        target:  /var/www/html/themes/myTheme # path to be mounted in the container
       - psdata:/var/www/html
 networks:
   prestashop_network:
