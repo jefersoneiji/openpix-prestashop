@@ -34,7 +34,7 @@ class Woovi extends PaymentModule
     protected $config_form = false;
 
     const CONFIG_PO_EXTERNAL_ENABLED = 'WOOVI_PO_EXTERNAL_ENABLED';
-    
+
     public function __construct()
     {
         $this->name = 'woovi';
@@ -90,6 +90,7 @@ class Woovi extends PaymentModule
         }
 
         Configuration::updateValue('WOOVI_APP_ID_OPENPIX', '');
+        Configuration::updateValue('OPENPIX_PUBLIC_KEY_BASE64', 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FDLytOdElranpldnZxRCtJM01NdjNiTFhEdApwdnhCalk0QnNSclNkY2EzcnRBd01jUllZdnhTbmQ3amFnVkxwY3RNaU94UU84aWVVQ0tMU1dIcHNNQWpPL3paCldNS2Jxb0c4TU5waS91M2ZwNnp6MG1jSENPU3FZc1BVVUcxOWJ1VzhiaXM1WloySVpnQk9iV1NwVHZKMGNuajYKSEtCQUE4MkpsbitsR3dTMU13SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQo=');
 
         return parent::install() &&
             $this->registerHook('header') &&
@@ -97,12 +98,14 @@ class Woovi extends PaymentModule
             $this->registerHook('payment') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('paymentOptions') &&
+            $this->registerHook('moduleRoutes') &&
             $this->installConfiguration();
     }
 
     public function uninstall()
     {
         Configuration::deleteByName('WOOVI_APP_ID_OPENPIX');
+        Configuration::deleteByName('OPENPIX_PUBLIC_KEY_BASE64');
 
         return parent::uninstall() &&
             (bool) Configuration::deleteByName(static::CONFIG_PO_EXTERNAL_ENABLED);
@@ -232,6 +235,24 @@ class Woovi extends PaymentModule
     {
         $this->context->controller->addJS($this->_path . '/views/js/front.js');
         $this->context->controller->addCSS($this->_path . '/views/css/front.css');
+    }
+
+    /**
+     * Add front controller routes for webhook notifications. 
+     */
+    public function hookModuleRoutes()
+    {
+        return [
+            'module-woovi-webhok' => [
+                'rule' => 'woovi/webhook',
+                'keywords' => [],
+                'controller' => 'webhook',
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'woovi'
+                ]
+            ]
+        ];
     }
 
     /**
