@@ -36,6 +36,20 @@ services:
         source: ./ # local path to the module
         target: /var/www/html/modules/woovi # path to be mounted in the container
       - psdata:/var/www/html
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    links:
+      - mysql
+    environment:
+      PMA_HOST: some-mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: unless-stopped
+    ports:
+      - 8081:80
+    networks:
+    - prestashop_network
 networks:
   prestashop_network:
 volumes:
