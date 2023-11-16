@@ -34,7 +34,7 @@ class Woovi extends PaymentModule
     protected $config_form = false;
 
     const CONFIG_PO_EXTERNAL_ENABLED = 'WOOVI_PO_EXTERNAL_ENABLED';
-    
+
     public function __construct()
     {
         $this->name = 'woovi';
@@ -97,6 +97,7 @@ class Woovi extends PaymentModule
             $this->registerHook('payment') &&
             $this->registerHook('paymentReturn') &&
             $this->registerHook('paymentOptions') &&
+            $this->registerHook('moduleRoutes') &&
             $this->installConfiguration();
     }
 
@@ -232,6 +233,24 @@ class Woovi extends PaymentModule
     {
         $this->context->controller->addJS($this->_path . '/views/js/front.js');
         $this->context->controller->addCSS($this->_path . '/views/css/front.css');
+    }
+
+    /**
+     * Add front controller routes for webhook notifications. 
+     */
+    public function hookModuleRoutes()
+    {
+        return [
+            'module-woovi-webhok' => [
+                'rule' => 'woovi/webhook',
+                'keywords' => [],
+                'controller' => 'webhook',
+                'params' => [
+                    'fc' => 'module',
+                    'module' => 'woovi'
+                ]
+            ]
+        ];
     }
 
     /**
