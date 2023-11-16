@@ -61,6 +61,21 @@ password
 ```cmd
 prestashop_demo
 ```
+
+### Credentials for PHP Admin
+
+server
+```cmd
+some-mysql
+```
+user
+```cmd
+root
+```
+password
+```cmd
+admin
+```
 #### PAY ATTENTION TO THIS: The Woovi payment method will only show in cart IF THE ORDER'S DELIVERY COUNTRY AND MODULE'S COUNTRY ARE EQUAL. Pick France.
 
 ## License
