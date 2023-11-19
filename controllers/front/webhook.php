@@ -57,7 +57,7 @@ class WooviWebhookModuleFrontController extends AbstractRestController
         $correlationID = $data['charge']['correlationID'];
         $isUpdated = Db::getInstance()->update(
             'orders',
-            array('current_state' => 5),
+            array('current_state' => 2),
             'correlation_id = "' . $correlationID . '"',
             1,
             true
