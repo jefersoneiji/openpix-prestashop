@@ -17,17 +17,6 @@ class WooviWebhookModuleFrontController extends AbstractRestController
         return $verify === 1 ? true : false;
     }
 
-    protected function isValidWebhookPayload($data)
-    {
-        if (!isset($data['event']) || empty($data['event'])) {
-            if (!isset($data['evento']) || empty($data['evento'])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     protected function instant_payment_notifications_handler()
     {
         $body = file_get_contents('php://input', true);
@@ -59,37 +48,91 @@ class WooviWebhookModuleFrontController extends AbstractRestController
             echo json_encode($response);
             exit();
         }
+
+        $this->handleWebhookOrderUpdate($data);
     }
+
+    protected function handleWebhookOrderUpdate($data)
+    {
+        $correlationID = $data['charge']['correlationID'];
+        $isUpdated = Db::getInstance()->update(
+            'orders',
+            array('current_state' => 5),
+            'correlation_id = "' . $correlationID . '"',
+            1,
+            true
+        );
+
+        $status = $data['charge']['status'];
+        if ($isUpdated) {
+            header('HTTP/1.1 200 OK');
+            $query = 'SELECT * FROM `' . _DB_PREFIX_ . 'orders` WHERE `correlation_id` LIKE "' . $correlationID . '"';
+            $response = [
+                'message' => 'sucess',
+                'order_id' => Db::getInstance()->getRow($query)['id_order'],
+                'correlationID' => $correlationID,
+                'status' => $status
+            ];
+            echo json_encode($response);
+            exit();
+        }
+
+        if (!$isUpdated) {
+            header('HTTP/1.1 200 OK');
+            $response = [
+                'message' => 'fail',
+                'error' => 'order not found',
+                'order_id' => null,
+                'status' => $status
+            ];
+            echo json_encode($response);
+            exit();
+        }
+    }
+
+    protected function methodNotAllowedResponse(){
+        header('HTTP/1.2 405 Method Not Allowed');
+        $response = [
+            'error' => 'Method not allowed. Use POST.'
+        ];
+
+        echo json_encode($response);
+        exit();
+    }
+
     protected function processGetRequest()
     {
+        $this->methodNotAllowedResponse();
         $this->ajaxDie(json_encode([
             'sucess' => true,
-            'operation' => 'get'
+            'operation' => 'get',
         ]));
     }
 
     protected function processPostRequest()
     {
+        $this->instant_payment_notifications_handler();
         $this->ajaxDie(json_encode([
             'sucess' => true,
             'operation' => 'post',
-            'webhook' => $this->instant_payment_notifications_handler()
         ]));
     }
 
     protected function processPutRequest()
     {
+        $this->methodNotAllowedResponse();
         $this->ajaxDie(json_encode([
             'sucess' => true,
-            'operation' => 'put'
+            'operation' => 'put',
         ]));
     }
 
     protected function processDeleteRequest()
     {
+        $this->methodNotAllowedResponse();
         $this->ajaxDie(json_encode([
             'sucess' => true,
-            'operation' => 'delete'
+            'operation' => 'delete',
         ]));
     }
 }
