@@ -122,6 +122,7 @@ class WooviWebhookModuleFrontController extends AbstractRestController
 
     protected function processPostRequest()
     {
+        $this->instant_payment_notifications_handler();
         $this->ajaxDie(json_encode([
             'sucess' => true,
             'operation' => 'post',
