@@ -17,6 +17,17 @@ class WooviWebhookModuleFrontController extends AbstractRestController
         return $verify === 1 ? true : false;
     }
 
+    protected function isValidWebhookPayload($data)
+    {
+        if (!isset($data['event']) || empty($data['event'])) {
+            if (!isset($data['evento']) || empty($data['evento'])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     protected function instant_payment_notifications_handler()
     {
         $body = file_get_contents('php://input', true);
@@ -99,19 +110,18 @@ class WooviWebhookModuleFrontController extends AbstractRestController
         echo json_encode($response);
         exit();
     }
-
+  
     protected function processGetRequest()
     {
         $this->methodNotAllowedResponse();
         $this->ajaxDie(json_encode([
             'sucess' => true,
-            'operation' => 'get',
+            'operation' => 'get'
         ]));
     }
 
     protected function processPostRequest()
     {
-        $this->instant_payment_notifications_handler();
         $this->ajaxDie(json_encode([
             'sucess' => true,
             'operation' => 'post',
@@ -123,7 +133,7 @@ class WooviWebhookModuleFrontController extends AbstractRestController
         $this->methodNotAllowedResponse();
         $this->ajaxDie(json_encode([
             'sucess' => true,
-            'operation' => 'put',
+            'operation' => 'put'
         ]));
     }
 
@@ -132,7 +142,7 @@ class WooviWebhookModuleFrontController extends AbstractRestController
         $this->methodNotAllowedResponse();
         $this->ajaxDie(json_encode([
             'sucess' => true,
-            'operation' => 'delete',
+            'operation' => 'delete'
         ]));
     }
 }
