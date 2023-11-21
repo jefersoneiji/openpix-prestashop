@@ -28,12 +28,25 @@
         </button>
        </div> 
     </form>
-     <div 
-        id="openpix-order"
-        data-appid={$appId}
-        data-correlationid={$uuid} 
-      />
-    <script src="https://plugin.openpix.com.br/v1/openpix.js" async></script>
+     <div id="openpix"/>
+    <script src="https://plugin.openpix.com.br/v1/openpix.js?appID={$appId}&correlationId={$uuid}&node=openpix" async></script>
+    <script>
+        console.log('window load triggered');
+        window.$openpix = window.$openpix || [];
+
+        const logEvents = (e) => {
+          if(e.type === 'CHARGE_COMPLETED'){
+            console.log('a cobrança foi paga.');
+          }
+        
+          if(e.type === 'CHARGE_EXPIRED'){
+            console.log('a cobrança expirada.');
+          }
+        }
+
+        if(!!window.$openpix?.addEventListener){
+          const unsubscribe = window.$openpix.addEventListener(logEvents);
+        }
     </script>
   </section>
 {/block}
