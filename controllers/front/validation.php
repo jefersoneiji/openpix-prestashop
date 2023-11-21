@@ -57,7 +57,6 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         Context::getContext()->language = new Language((int) Context::getContext()->customer->id_lang);
 
         $secure_key = Context::getContext()->customer->secure_key;
-
         if ($this->isValidOrder() === true) {
             $payment_status = Configuration::get('PS_OS_WS_PAYMENT');
             $message = null;
@@ -85,6 +84,14 @@ class WooviValidationModuleFrontController extends ModuleFrontController
             $secure_key
         );
 
+        $correlationID = Tools::getValue('uuid');
+        Db::getInstance()->update(
+            'orders',
+            array('correlation_id'=> $correlationID),
+            'id_cart = "' . $cart_id .'"',
+            1,
+            true
+        );
         $customer = new Customer($customer_id);
         Tools::redirect($this->context->link->getPageLink(
             'order-confirmation',
