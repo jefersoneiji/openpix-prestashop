@@ -31,6 +31,13 @@
 	<br /><br />{l s='An email has been sent with this information.' mod='woovi'}
 	<br /><br />{l s='If you have questions, comments or concerns, please contact our' mod='woovi'} <a href="{$link->getPageLink('contact', true)|escape:'html':'UTF-8'}">{l s='expert customer support team.' mod='woovi'}</a>
 </p>
+<h3>{l s='Pix payment QR Code.' mod='woovi'}</h3>
+<div 
+	id='openpix-order' 
+	data-appid={"$appId"}
+	data-correlationid={"$uuid"} 
+/>
+<script src="https://plugin.openpix.com.br/v1/openpix.js" async></script>
 {else}
 <h3>{l s='Your order on %s has not been accepted.' sprintf=$shop_name mod='woovi'}</h3>
 <p>

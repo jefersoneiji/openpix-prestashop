@@ -28,12 +28,5 @@
         </button>
        </div> 
     </form>
-     <div 
-        id="openpix-order"
-        data-appid={$appId}
-        data-correlationid={$uuid} 
-      />
-    <script src="https://plugin.openpix.com.br/v1/openpix.js" async></script>
-    </script>
   </section>
 {/block}
