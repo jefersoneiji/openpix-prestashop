@@ -71,15 +71,16 @@ class WooviExternalModuleFrontController extends ModuleFrontController
         $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
         $uuid = Uuid::uuid4();
         $this->context->smarty->assign([
-            'action' => $this->context->link->getModuleLink($this->module->name, 'validation', ['option' => 'external'], true),
+            'action' => $this->context->link->getModuleLink($this->module->name, 'validation', ['uuid' => $uuid->toString()], true),
             'appId' => $appId,
             'uuid' => $uuid,
         ]);
 
         $this->setTemplate('module:woovi/views/templates/front/external.tpl');
 
-        
-        $arr = array('correlationID' => $uuid->toString(), 'value' => 120);
+        $cart_total = $this->context->cart->getOrderTotal(true, Cart::BOTH);
+        $cart_total_only_numbers = str_replace(".", "", $cart_total);
+        $arr = array('correlationID' => $uuid->toString(), 'value' => $cart_total_only_numbers);
         $arr_json = json_encode($arr);
         
         try {
@@ -93,13 +94,6 @@ class WooviExternalModuleFrontController extends ModuleFrontController
             $response_debug = Psr7\Message::toString($e->getResponse());
             PrestaShopLogger::addLog(strval($response_debug), 2);
         }
-
-        $cart_total = $this->context->cart->getOrderTotal(true, Cart::BOTH);
-
-        // PrestaShopLogger::addLog(strval($cart_total), 1);
-        // PrestaShopLogger::addLog($uuid->toString(), 1);
-        // PrestaShopLogger::addLog($arr_json, 1);
-
     }
 
     /**
