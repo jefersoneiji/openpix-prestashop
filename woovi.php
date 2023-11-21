@@ -29,6 +29,15 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use Ramsey\Uuid\Uuid;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
+
+
 class Woovi extends PaymentModule
 {
     protected $config_form = false;
@@ -276,6 +285,39 @@ class Woovi extends PaymentModule
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
     }
 
+
+    protected function createChargeWoovi($appId, $arr_json)
+    {
+        try {
+            $client = new Client();
+            $headers = ['Authorization' => $appId, 'Content-Type' => 'application/json'];
+            $request = new Request('POST', 'https://api.woovi.com/api/v1/charge', $headers, $arr_json);
+            $res = $client->sendAsync($request)->wait();
+        } catch (ClientException $e) {
+            $response_debug = Psr7\Message::toString($e->getResponse());
+            PrestaShopLogger::addLog(strval($response_debug), 2);
+        }
+    }
+
+    protected function saveCorrelationIDToOrder($uuid, $cart_id)
+    {
+        Db::getInstance()->update(
+            'orders',
+            array('correlation_id' => $uuid),
+            'id_cart = "' . $cart_id . '"',
+            1,
+            true
+        );
+    }
+
+    protected function extractNumbersFromNonDigits($total)
+    {
+        $pattern = '/\D+/';
+        $replacement = '';
+        $only_digits = preg_replace($pattern, $replacement, $total);
+        return $only_digits;
+    }
+
     /**
      * This hook is used to display the order confirmation page.
      */
@@ -291,14 +333,29 @@ class Woovi extends PaymentModule
 
         $shop_name = $this->context->shop->name;
 
+        $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
+        $uuid = Uuid::uuid4();
+
+        $order_total = $this->context->getCurrentLocale()->formatPrice($params['order']->getOrdersTotalPaid(), (new Currency($params['order']->id_currency))->iso_code);
+        $arr = array(
+            'correlationID' => $uuid->toString(), 
+            'value' => $this->extractNumbersFromNonDigits($order_total),
+        );
+        $arr_json = json_encode($arr);
+        $this->createChargeWoovi($appId, $arr_json);
+
+        $cart_id = $order->id_cart;
+        $this->saveCorrelationIDToOrder($uuid, $cart_id);
+
         $this->smarty->assign(array(
             'shop_name' => [$shop_name],
             'id_order' => $order->id,
             'reference' => $order->reference,
             'params' => $params,
-            'total' => $this->context->getCurrentLocale()->formatPrice($params['order']->getOrdersTotalPaid(), (new Currency($params['order']->id_currency))->iso_code),
+            'total' => $order_total,
+            'uuid' => $uuid->toString(),
+            'appId' => $appId,
         ));
-        // 'total' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),
 
         return $this->display(__FILE__, 'views/templates/hook/confirmation.tpl');
     }
@@ -320,16 +377,7 @@ class Woovi extends PaymentModule
         }
         $option = new \PrestaShop\PrestaShop\Core\Payment\PaymentOption();
         $option->setCallToActionText($this->l(Configuration::get('WOOVI_LABEL_TITLE')))
-            ->setAction($this->context->link->getModuleLink($this->name, 'external', [], true))
-            ->setAdditionalInformation($this->context->smarty->fetch('module:woovi/views/templates/front/paymentOptionExternal.tpl'))
-            ->setInputs([
-                'token' => [
-                    'name' => 'token',
-                    'type' => 'hidden',
-                    'value' => '[5cbfniD+(gEV<59lYbG/,3VmHiE<U46;#G9*#NP#X.FA§]sb%ZG?5Q{xQ4#VM|7'
-                ]
-            ])
-            ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_ . $this->name . '/views/img/option/external.png'));
+            ->setAction($this->context->link->getModuleLink($this->name, 'validation', [], true));
 
         return [
             $option
