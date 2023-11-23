@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright since 2007 PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
@@ -17,14 +18,6 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
-
-use Ramsey\Uuid\Uuid;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
 
 /**
  * This Controller simulate an external payment gateway
@@ -68,32 +61,12 @@ class WooviExternalModuleFrontController extends ModuleFrontController
     {
         parent::initContent();
 
-        $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
-        $uuid = Uuid::uuid4();
         $this->context->smarty->assign([
-            'action' => $this->context->link->getModuleLink($this->module->name, 'validation', ['uuid' => $uuid->toString()], true),
-            'appId' => $appId,
-            'uuid' => $uuid,
+            'action' => $this->context->link->getModuleLink($this->module->name, 'validation', [], true),
         ]);
 
         $this->setTemplate('module:woovi/views/templates/front/external.tpl');
 
-        $cart_total = $this->context->cart->getOrderTotal(true, Cart::BOTH);
-        $cart_total_only_numbers = str_replace(".", "", $cart_total);
-        $arr = array('correlationID' => $uuid->toString(), 'value' => $cart_total_only_numbers);
-        $arr_json = json_encode($arr);
-        
-        try {
-            $client = new Client();
-            $headers = ['Authorization' => $appId, 'Content-Type' => 'application/json'];
-            $request = new Request('POST', 'https://api.woovi.com/api/v1/charge', $headers, $arr_json);
-            $res = $client->sendAsync($request)->wait();
-            PrestaShopLogger::addLog('response from api: ' . $res->getBody(), 1);
-
-        } catch (ClientException $e) {
-            $response_debug = Psr7\Message::toString($e->getResponse());
-            PrestaShopLogger::addLog(strval($response_debug), 2);
-        }
     }
 
     /**
