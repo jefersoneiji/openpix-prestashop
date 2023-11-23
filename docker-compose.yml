@@ -28,7 +28,7 @@ services:
       PS_FOLDER_INSTALL: install4577
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:8080
-      PS_COUNTRY: FR
+      PS_COUNTRY: BR
     networks:
       - prestashop_network
     volumes:
