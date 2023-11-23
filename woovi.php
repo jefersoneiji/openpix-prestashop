@@ -292,7 +292,7 @@ class Woovi extends PaymentModule
             $client = new Client();
             $headers = ['Authorization' => $appId, 'Content-Type' => 'application/json'];
             $request = new Request('POST', 'https://api.woovi.com/api/v1/charge', $headers, $arr_json);
-            $res = $client->sendAsync($request)->wait();
+            $client->sendAsync($request)->wait();
         } catch (ClientException $e) {
             $response_debug = Psr7\Message::toString($e->getResponse());
             PrestaShopLogger::addLog(strval($response_debug), 2);
@@ -318,6 +318,14 @@ class Woovi extends PaymentModule
         return $only_digits;
     }
 
+    protected function checkIfCorrelationIdExistsInOrder($id_cart)
+    {
+        $sql = 'SELECT correlation_id FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_cart` LIKE "' . $id_cart . '"';
+        $response = Db::getInstance()->getValue($sql);
+        $isEmpty = empty($response);
+        return $isEmpty;
+    }
+
     /**
      * This hook is used to display the order confirmation page.
      */
@@ -334,26 +342,37 @@ class Woovi extends PaymentModule
         $shop_name = $this->context->shop->name;
 
         $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
-        $uuid = Uuid::uuid4();
 
         $order_total = $this->context->getCurrentLocale()->formatPrice($params['order']->getOrdersTotalPaid(), (new Currency($params['order']->id_currency))->iso_code);
-        $arr = array(
-            'correlationID' => $uuid->toString(), 
-            'value' => $this->extractNumbersFromNonDigits($order_total),
-        );
-        $arr_json = json_encode($arr);
-        $this->createChargeWoovi($appId, $arr_json);
 
         $cart_id = $order->id_cart;
-        $this->saveCorrelationIDToOrder($uuid, $cart_id);
+        $isEmpty = $this->checkIfCorrelationIdExistsInOrder($cart_id);
 
+        if ($isEmpty) {
+            $uuid_raw = Uuid::uuid4();
+            $uuid = $uuid_raw->toString();
+
+            $arr = array(
+                'correlationID' => $uuid,
+                'value' => $this->extractNumbersFromNonDigits($order_total),
+            );
+            $arr_json = json_encode($arr);
+            $this->createChargeWoovi($appId, $arr_json);
+            $this->saveCorrelationIDToOrder($uuid, $cart_id);
+        }
+
+        if ($isEmpty === false) {
+            $sql = 'SELECT correlation_id FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_cart` LIKE "' . $cart_id . '"';
+            $uuid = Db::getInstance()->getValue($sql);
+        }
+        
         $this->smarty->assign(array(
             'shop_name' => [$shop_name],
             'id_order' => $order->id,
             'reference' => $order->reference,
             'params' => $params,
             'total' => $order_total,
-            'uuid' => $uuid->toString(),
+            'uuid' => $uuid,
             'appId' => $appId,
         ));
 
