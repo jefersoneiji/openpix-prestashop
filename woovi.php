@@ -62,11 +62,11 @@ class Woovi extends PaymentModule
         $this->displayName = $this->l('Woovi');
         $this->description = $this->l('Woovi module for payments using open pix');
 
-        $this->limited_countries = array('FR');
+        $this->limited_countries = array('US', 'BR');
 
-        $this->limited_currencies = array('EUR');
+        $this->limited_currencies = array('USD', 'BRL');
 
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.7.6', 'max' => _PS_VERSION_);
     }
 
 
@@ -100,8 +100,8 @@ class Woovi extends PaymentModule
 
         Configuration::updateValue('WOOVI_APP_ID_OPENPIX', '');
         Configuration::updateValue('OPENPIX_PUBLIC_KEY_BASE64', 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FDLytOdElranpldnZxRCtJM01NdjNiTFhEdApwdnhCalk0QnNSclNkY2EzcnRBd01jUllZdnhTbmQ3amFnVkxwY3RNaU94UU84aWVVQ0tMU1dIcHNNQWpPL3paCldNS2Jxb0c4TU5waS91M2ZwNnp6MG1jSENPU3FZc1BVVUcxOWJ1VzhiaXM1WloySVpnQk9iV1NwVHZKMGNuajYKSEtCQUE4MkpsbitsR3dTMU13SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQo=');
-        Configuration::updateValue('WOOVI_LABEL_TITLE', 'Pix payment by Woovi');
-        Configuration::updateValue('WOOVI_LABEL_DESCRIPTION', 'tax free payments using pix');
+        Configuration::updateValue('WOOVI_LABEL_TITLE', $this->l('Pix payment by Woovi'));
+        Configuration::updateValue('WOOVI_LABEL_DESCRIPTION', $this->l('tax free payments using pix'));
 
         return parent::install() &&
             $this->registerHook('header') &&
@@ -138,9 +138,7 @@ class Woovi extends PaymentModule
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
-        $output = $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
-
-        return $output . $this->renderForm();
+        return $this->renderForm();
     }
 
     /**
@@ -213,8 +211,8 @@ class Woovi extends PaymentModule
     {
         return array(
             'WOOVI_APP_ID_OPENPIX' => Configuration::get('WOOVI_APP_ID_OPENPIX', ''),
-            'WOOVI_LABEL_TITLE' => Configuration::get('WOOVI_LABEL_TITLE', 'Pix payment by Woovi'),
-            'WOOVI_LABEL_DESCRIPTION' => Configuration::get('WOOVI_LABEL_DESCRIPTION', 'tax free payments using pix'),
+            'WOOVI_LABEL_TITLE' => Configuration::get('WOOVI_LABEL_TITLE'),
+            'WOOVI_LABEL_DESCRIPTION' => Configuration::get('WOOVI_LABEL_DESCRIPTION'),
         );
     }
 
