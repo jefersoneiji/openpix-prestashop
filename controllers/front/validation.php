@@ -24,6 +24,16 @@
  *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *  International Registered Trademark & Property of PrestaShop SA
  */
+
+
+use Ramsey\Uuid\Uuid;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
+
 class WooviValidationModuleFrontController extends ModuleFrontController
 {
     /**
@@ -84,6 +94,21 @@ class WooviValidationModuleFrontController extends ModuleFrontController
             $secure_key
         );
 
+        $uuid = Uuid::uuid4();
+        $order_total = $this->context->getCurrentLocale()->formatPrice($amount, (new Currency($currency_id))->iso_code);
+        $arr = array(
+            'correlationID' => $uuid->toString(),
+            'value' => $this->extractNumbersFromNonDigits($order_total),
+            'customer' => [
+                'name' => $_POST['customerName'],
+                'email' => $_POST['customerEmail'],
+                'phone' => $_POST['customerPhone']
+            ]
+        );
+        $arr_json = json_encode($arr);
+        $this->createChargeWoovi($arr_json);
+        $this->saveCorrelationIDToOrder($uuid->toString(), $cart_id);
+
         $customer = new Customer($customer_id);
         Tools::redirect($this->context->link->getPageLink(
             'order-confirmation',
@@ -98,6 +123,38 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         ));
     }
 
+    protected function createChargeWoovi($arr_json)
+    {
+        try {
+            $client = new Client();
+            $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
+            $headers = ['Authorization' => $appId, 'Content-Type' => 'application/json'];
+            $request = new Request('POST', 'https://api.woovi.com/api/v1/charge', $headers, $arr_json);
+            $client->sendAsync($request)->wait();
+        } catch (ClientException $e) {
+            $response_debug = Psr7\Message::toString($e->getResponse());
+            PrestaShopLogger::addLog(strval($response_debug), 2);
+        }
+    }
+
+    protected function extractNumbersFromNonDigits($total)
+    {
+        $pattern = '/\D+/';
+        $replacement = '';
+        $only_digits = preg_replace($pattern, $replacement, $total);
+        return $only_digits;
+    }
+
+    protected function saveCorrelationIDToOrder($uuid, $cart_id)
+    {
+        Db::getInstance()->update(
+            'orders',
+            array('correlation_id' => $uuid),
+            'id_cart = "' . $cart_id . '"',
+            1,
+            true
+        );
+    }
     protected function isValidOrder()
     {
         /*
