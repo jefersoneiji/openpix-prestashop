@@ -29,15 +29,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use Ramsey\Uuid\Uuid;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
-
-
 class Woovi extends PaymentModule
 {
     protected $config_form = false;
@@ -283,45 +274,10 @@ class Woovi extends PaymentModule
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
     }
 
-
-    protected function createChargeWoovi($appId, $arr_json)
-    {
-        try {
-            $client = new Client();
-            $headers = ['Authorization' => $appId, 'Content-Type' => 'application/json'];
-            $request = new Request('POST', 'https://api.woovi.com/api/v1/charge', $headers, $arr_json);
-            $client->sendAsync($request)->wait();
-        } catch (ClientException $e) {
-            $response_debug = Psr7\Message::toString($e->getResponse());
-            PrestaShopLogger::addLog(strval($response_debug), 2);
-        }
-    }
-
-    protected function saveCorrelationIDToOrder($uuid, $cart_id)
-    {
-        Db::getInstance()->update(
-            'orders',
-            array('correlation_id' => $uuid),
-            'id_cart = "' . $cart_id . '"',
-            1,
-            true
-        );
-    }
-
-    protected function extractNumbersFromNonDigits($total)
-    {
-        $pattern = '/\D+/';
-        $replacement = '';
-        $only_digits = preg_replace($pattern, $replacement, $total);
-        return $only_digits;
-    }
-
-    protected function checkIfCorrelationIdExistsInOrder($id_cart)
-    {
-        $sql = 'SELECT correlation_id FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_cart` LIKE "' . $id_cart . '"';
-        $response = Db::getInstance()->getValue($sql);
-        $isEmpty = empty($response);
-        return $isEmpty;
+    protected function getCorrelationIDFromOrder($cart_id){
+        $sql = 'SELECT correlation_id FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_cart` LIKE "' . $cart_id . '"';
+        $uuid = Db::getInstance()->getValue($sql);
+        return $uuid;
     }
 
     /**
@@ -336,33 +292,13 @@ class Woovi extends PaymentModule
 
         if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
             $this->smarty->assign('status', 'ok');
-
-        $shop_name = $this->context->shop->name;
-
-        $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
-
-        $order_total = $this->context->getCurrentLocale()->formatPrice($params['order']->getOrdersTotalPaid(), (new Currency($params['order']->id_currency))->iso_code);
-
+        
         $cart_id = $order->id_cart;
-        $isEmpty = $this->checkIfCorrelationIdExistsInOrder($cart_id);
-
-        if ($isEmpty) {
-            $uuid_raw = Uuid::uuid4();
-            $uuid = $uuid_raw->toString();
-
-            $arr = array(
-                'correlationID' => $uuid,
-                'value' => $this->extractNumbersFromNonDigits($order_total),
-            );
-            $arr_json = json_encode($arr);
-            $this->createChargeWoovi($appId, $arr_json);
-            $this->saveCorrelationIDToOrder($uuid, $cart_id);
-        }
-
-        if ($isEmpty === false) {
-            $sql = 'SELECT correlation_id FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_cart` LIKE "' . $cart_id . '"';
-            $uuid = Db::getInstance()->getValue($sql);
-        }
+        $uuid = $this->getCorrelationIDFromOrder($cart_id);
+        
+        $shop_name = $this->context->shop->name;
+        $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
+        $order_total = $this->context->getCurrentLocale()->formatPrice($params['order']->getOrdersTotalPaid(), (new Currency($params['order']->id_currency))->iso_code);
         
         $this->smarty->assign(array(
             'shop_name' => [$shop_name],
@@ -392,13 +328,25 @@ class Woovi extends PaymentModule
         if (!$this->checkCurrency($params['cart'])) {
             return;
         }
+
         $option = new \PrestaShop\PrestaShop\Core\Payment\PaymentOption();
         $option->setCallToActionText($this->l(Configuration::get('WOOVI_LABEL_TITLE')))
-            ->setAction($this->context->link->getModuleLink($this->name, 'validation', [], true));
+            ->setForm($this->generatePixForm());
 
         return [
             $option
         ];
+    }
+
+    private function generatePixForm()
+    {
+        $this->context->smarty->assign(
+            array(
+                'action' => $this->context->link->getModuleLink($this->name, 'validation', [], true),
+            )
+        );
+
+        return $this->context->smarty->fetch('module:woovi/views/templates/hook/payment.tpl');
     }
 
     public function checkCurrency($cart)
