@@ -25,7 +25,7 @@
 */
 $sql = array();
 
-$sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'orders` ADD `correlation_id` VARCHAR(36) NULL DEFAULT NULL AFTER `note`' ;
+$sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'orders` ADD `correlation_id` VARCHAR(36) NOT NULL DEFAULT "undefined" AFTER `note`' ;
 
 
 foreach ($sql as $query) {
