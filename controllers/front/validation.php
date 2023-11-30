@@ -82,6 +82,8 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         $module_name = $this->module->displayName;
         $currency_id = (int) Context::getContext()->currency->id;
 
+        $this->validateFormRequiredFields();
+
         $this->module->validateOrder(
             $cart_id,
             $payment_status,
@@ -155,11 +157,20 @@ class WooviValidationModuleFrontController extends ModuleFrontController
             true
         );
     }
+
     protected function isValidOrder()
     {
         /*
          * Add your checks right there
          */
         return true;
+    }
+
+    protected function validateFormRequiredFields()
+    {
+        if (empty($_POST['customerName'] || $_POST['customerPhone'] || $_POST['customerEmail'])) {
+            $this->errors[] = $this->l('All Pix form fields are required.');
+            $this->redirectWithNotifications($this->context->link->getPageLink('order'));
+        }
     }
 }
