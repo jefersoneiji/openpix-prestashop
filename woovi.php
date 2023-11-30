@@ -89,10 +89,12 @@ class Woovi extends PaymentModule
             return false;
         }
 
+        include(dirname(__FILE__) . '/sql/install.php');
+
         Configuration::updateValue('WOOVI_APP_ID_OPENPIX', '');
         Configuration::updateValue('OPENPIX_PUBLIC_KEY_BASE64', 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FDLytOdElranpldnZxRCtJM01NdjNiTFhEdApwdnhCalk0QnNSclNkY2EzcnRBd01jUllZdnhTbmQ3amFnVkxwY3RNaU94UU84aWVVQ0tMU1dIcHNNQWpPL3paCldNS2Jxb0c4TU5waS91M2ZwNnp6MG1jSENPU3FZc1BVVUcxOWJ1VzhiaXM1WloySVpnQk9iV1NwVHZKMGNuajYKSEtCQUE4MkpsbitsR3dTMU13SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQo=');
         Configuration::updateValue('WOOVI_LABEL_TITLE', $this->l('Pix payment by Woovi'));
-        Configuration::updateValue('WOOVI_LABEL_DESCRIPTION', $this->l('tax free payments using pix'));
+        Configuration::updateValue('WOOVI_LABEL_DESCRIPTION', $this->l('Tax free payments using pix'));
 
         return parent::install() &&
             $this->registerHook('header') &&
@@ -274,7 +276,8 @@ class Woovi extends PaymentModule
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
     }
 
-    protected function getCorrelationIDFromOrder($cart_id){
+    protected function getCorrelationIDFromOrder($cart_id)
+    {
         $sql = 'SELECT correlation_id FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_cart` LIKE "' . $cart_id . '"';
         $uuid = Db::getInstance()->getValue($sql);
         return $uuid;
@@ -292,14 +295,14 @@ class Woovi extends PaymentModule
 
         if ($order->getCurrentOrderState()->id != Configuration::get('PS_OS_ERROR'))
             $this->smarty->assign('status', 'ok');
-        
+
         $cart_id = $order->id_cart;
         $uuid = $this->getCorrelationIDFromOrder($cart_id);
-        
+
         $shop_name = $this->context->shop->name;
         $appId = Configuration::get('WOOVI_APP_ID_OPENPIX');
         $order_total = $this->context->getCurrentLocale()->formatPrice($params['order']->getOrdersTotalPaid(), (new Currency($params['order']->id_currency))->iso_code);
-        
+
         $this->smarty->assign(array(
             'shop_name' => [$shop_name],
             'id_order' => $order->id,

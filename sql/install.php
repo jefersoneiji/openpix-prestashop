@@ -25,10 +25,8 @@
 */
 $sql = array();
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'woovi` (
-    `id_woovi` int(11) NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY  (`id_woovi`)
-) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+$sql[] = 'ALTER TABLE `' . _DB_PREFIX_ . 'orders` ADD `correlation_id` VARCHAR(36) NULL DEFAULT NULL AFTER `note`' ;
+
 
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query) == false) {
