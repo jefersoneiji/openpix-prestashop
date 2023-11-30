@@ -71,6 +71,12 @@ class Woovi extends PaymentModule
         return (bool) Configuration::updateGlobalValue(static::CONFIG_PO_EXTERNAL_ENABLED, '1');
     }
 
+    private function checkIfCorrelationIDExists(){
+        $query =  'SELECT * FROM `' . _DB_PREFIX_ . 'orders`';
+        $correlation_id_column_exists = isset(Db::getInstance()->getRow($query)['correlation_id']);
+        return $correlation_id_column_exists;
+    }
+
     /**
      * Don't forget to create update methods if needed:
      * http://doc.prestashop.com/display/PS16/Enabling+the+Auto-Update
@@ -89,7 +95,9 @@ class Woovi extends PaymentModule
             return false;
         }
 
-        include(dirname(__FILE__) . '/sql/install.php');
+        if($this->checkIfCorrelationIDExists() === false){
+            include(dirname(__FILE__) . '/sql/install.php');
+        }
 
         Configuration::updateValue('WOOVI_APP_ID_OPENPIX', '');
         Configuration::updateValue('OPENPIX_PUBLIC_KEY_BASE64', 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FDLytOdElranpldnZxRCtJM01NdjNiTFhEdApwdnhCalk0QnNSclNkY2EzcnRBd01jUllZdnhTbmQ3amFnVkxwY3RNaU94UU84aWVVQ0tMU1dIcHNNQWpPL3paCldNS2Jxb0c4TU5waS91M2ZwNnp6MG1jSENPU3FZc1BVVUcxOWJ1VzhiaXM1WloySVpnQk9iV1NwVHZKMGNuajYKSEtCQUE4MkpsbitsR3dTMU13SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQo=');
@@ -177,6 +185,7 @@ class Woovi extends PaymentModule
                     array(
                         'type' => 'text',
                         'label' => $this->l('AppID OpenPix'),
+                        'required' => true,
                         'name' => 'WOOVI_APP_ID_OPENPIX',
                     ),
                     array(
