@@ -98,6 +98,8 @@ class WooviValidationModuleFrontController extends ModuleFrontController
 
         $uuid = Uuid::uuid4();
         $order_total = $this->context->getCurrentLocale()->formatPrice($amount, (new Currency($currency_id))->iso_code);
+        $order = new Order((int) $this->module->currentOrder);
+
         $arr = array(
             'correlationID' => $uuid->toString(),
             'value' => $this->extractNumbersFromNonDigits($order_total),
@@ -105,7 +107,14 @@ class WooviValidationModuleFrontController extends ModuleFrontController
                 'name' => $_POST['customerName'],
                 'email' => $_POST['customerEmail'],
                 'phone' => $_POST['customerPhone']
-            ]
+            ],
+            'additionalInfo' => [
+                [
+                    'key' => $this->l('Reference Code'),
+                    'value' => $order->getUniqReference()
+                ]
+            ],
+
         );
         $arr_json = json_encode($arr);
         $this->createChargeWoovi($arr_json);
