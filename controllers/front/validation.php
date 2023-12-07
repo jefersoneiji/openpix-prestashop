@@ -83,6 +83,7 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         $currency_id = (int) Context::getContext()->currency->id;
 
         $this->validateFormRequiredFields();
+        $this->validateAppID();
 
         $this->module->validateOrder(
             $cart_id,
@@ -179,6 +180,14 @@ class WooviValidationModuleFrontController extends ModuleFrontController
     {
         if (empty($_POST['customerName'] || $_POST['customerPhone'] || $_POST['customerEmail'])) {
             $this->errors[] = $this->l('All Pix form fields are required.');
+            $this->redirectWithNotifications($this->context->link->getPageLink('order'));
+        }
+    }
+
+    protected function validateAppID()
+    {
+        if (empty(Configuration::get('WOOVI_APP_ID_OPENPIX'))) {
+            $this->errors[] = $this->l('AppID is required. In your Back-Office go to: Modules > Module Manager > Woovi > Configure. And set up your AppID');
             $this->redirectWithNotifications($this->context->link->getPageLink('order'));
         }
     }
