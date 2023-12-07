@@ -19,6 +19,7 @@ $_MODULE['<{woovi}prestashop>redirect_902b0d55fddef6f8d651fe1035b7d4bd'] = 'Erro
 $_MODULE['<{woovi}prestashop>validation_e61b0be95b713b117d27dbd19d75f69a'] = 'Um erro aconteceu durante o processamento do pagamento.';
 $_MODULE['<{woovi}prestashop>validation_0c453adf51a3098739d722a13b12559d'] = 'Código do pedido';
 $_MODULE['<{woovi}prestashop>validation_a2b482db06505b820968302ffd492b99'] = 'Todos os campos do formulário são obrigatórios.';
+$_MODULE['<{woovi}prestashop>validation_7bcb8100e5f009a8c260b19a3ff1e296'] = 'AppID necessário. No seu Back-Office vá em: Módulos > Gerenciador de Módulos > Woovi > Configurar. E guarde seu AppID.';
 $_MODULE['<{woovi}prestashop>error_a25c753ee3e4be15ec0daa5a40deb7b8'] = 'Um erro ocorreu';
 $_MODULE['<{woovi}prestashop>redirect_983ae9b1959f4268db20957fc51b5e64'] = 'Redirecione seu cliente';
 $_MODULE['<{woovi}prestashop>redirect_c4a25e957da921186bf7b0a8efb968da'] = 'Essa ação é usada para redirecionar seu cliente para o website do gateway de pagamentos.';
