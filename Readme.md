@@ -21,34 +21,21 @@ and you have admin access to the terminal.
 ### Installing
 
 To run locally:
-1. In root level... install composer by running each script separately and in this order
-   ```cmd
-   php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-   ```
-   ```cmd
-   php -r "if (hash_file('sha384', 'composer-setup.php') === 'e21205b207c3ff031906575712edab6f13eb0b361f2085f1f1237b7126d785e826a450292b6cfd1d64d92e6563bbde02') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-   ```
-   ```cmd
-   php composer-setup.php
-   ```
-   ```cmd
-   php -r "unlink('composer-setup.php');"
-   ``` 
-2. Then install composer dependencies
-   ```cmd
-   php composer.phar install
-   ```
-3. Finally spin up docker
+1. Spin up docker from CLI
    ```cmd
    docker compose up
    ```
-    
+2. Open the prestashop container's CLI and paste this command
+   ```cmd
+   cd modules/woovi && sh composer.sh
+   ```
+
 ### To access Store (Front-Office)
-  ```http
+  ```
   http://localhost:8080
   ```
 ### To acess Admin dashboard (Back-Office)
- ```http
+ ```
  http://localhost:8080/admin4577
  ```
 ### Credentials for Admin dashboard
