@@ -82,7 +82,7 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         $module_name = $this->module->displayName;
         $currency_id = (int) Context::getContext()->currency->id;
 
-        $this->validateFormRequiredFields();
+        $this->validateCustomerFields();
         $this->validateAppID();
 
         $this->module->validateOrder(
@@ -100,14 +100,14 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         $uuid = Uuid::uuid4();
         $order_total = $this->context->getCurrentLocale()->formatPrice($amount, (new Currency($currency_id))->iso_code);
         $order = new Order((int) $this->module->currentOrder);
+        $customer = $this->context->customer;
 
         $arr = array(
             'correlationID' => $uuid->toString(),
             'value' => $this->extractNumbersFromNonDigits($order_total),
             'customer' => [
-                'name' => $_POST['customerName'],
-                'email' => $_POST['customerEmail'],
-                'phone' => $_POST['customerPhone']
+                'name' => $customer->firstname . " " . $customer->lastname,
+                'email' => $customer->email,
             ],
             'additionalInfo' => [
                 [
@@ -176,10 +176,10 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         return true;
     }
 
-    protected function validateFormRequiredFields()
+    protected function validateCustomerFields()
     {
-        if (empty($_POST['customerName'] || $_POST['customerPhone'] || $_POST['customerEmail'])) {
-            $this->errors[] = $this->l('All Pix form fields are required.');
+        if (empty($this->context->customer->firstname || $this->context->customer->email)) {
+            $this->errors[] = $this->l('Customer data is required for this order. Please, get in touch with the vendor.');
             $this->redirectWithNotifications($this->context->link->getPageLink('order'));
         }
     }

@@ -71,7 +71,8 @@ class Woovi extends PaymentModule
         return (bool) Configuration::updateGlobalValue(static::CONFIG_PO_EXTERNAL_ENABLED, '1');
     }
 
-    private function checkIfCorrelationIDExists(){
+    private function checkIfCorrelationIDExists()
+    {
         $query =  'SELECT * FROM `' . _DB_PREFIX_ . 'orders`';
         $correlation_id_column_exists = isset(Db::getInstance()->getRow($query)['correlation_id']);
         return $correlation_id_column_exists;
@@ -95,7 +96,7 @@ class Woovi extends PaymentModule
             return false;
         }
 
-        if($this->checkIfCorrelationIDExists() === false){
+        if ($this->checkIfCorrelationIDExists() === false) {
             include(dirname(__FILE__) . '/sql/install.php');
         }
 
@@ -342,23 +343,12 @@ class Woovi extends PaymentModule
         }
 
         $option = new \PrestaShop\PrestaShop\Core\Payment\PaymentOption();
-        $option->setCallToActionText($this->l(Configuration::get('WOOVI_LABEL_TITLE')))
-            ->setForm($this->generatePixForm());
+        $option->setCallToActionText($this->l(Configuration::get('WOOVI_LABEL_TITLE')));
+        $option->setAction($this->context->link->getModuleLink($this->name, 'validation', [], true));
 
         return [
             $option
         ];
-    }
-
-    private function generatePixForm()
-    {
-        $this->context->smarty->assign(
-            array(
-                'action' => $this->context->link->getModuleLink($this->name, 'validation', [], true),
-            )
-        );
-
-        return $this->context->smarty->fetch('module:woovi/views/templates/hook/payment.tpl');
     }
 
     public function checkCurrency($cart)
