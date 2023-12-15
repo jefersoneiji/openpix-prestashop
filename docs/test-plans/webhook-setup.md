@@ -9,3 +9,7 @@ Webhook set-up in prestashop so that order' status is updated after charge compl
 ## 1. Order status is updated after the event is triggered in Woovi's back-end
 
 ![Order status updated in prestashop after webhook endpoint is triggered](./media/webhook-set-up-step-1.PNG "step 1")
+
+## Order's state machine
+
+![Order's state machine](./media/order-state-machine.svg "order state machine")
