@@ -31,8 +31,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
 
 class WooviValidationModuleFrontController extends ModuleFrontController
 {
@@ -101,6 +99,8 @@ class WooviValidationModuleFrontController extends ModuleFrontController
         $order_total = $this->context->getCurrentLocale()->formatPrice($amount, (new Currency($currency_id))->iso_code);
         $order = new Order((int) $this->module->currentOrder);
         $customer = $this->context->customer;
+        $shop_name = Configuration::get('PS_SHOP_NAME');
+        $order_reference_code = $order->getUniqReference();
 
         $arr = array(
             'correlationID' => $uuid->toString(),
@@ -109,12 +109,7 @@ class WooviValidationModuleFrontController extends ModuleFrontController
                 'name' => $customer->firstname . " " . $customer->lastname,
                 'email' => $customer->email,
             ],
-            'additionalInfo' => [
-                [
-                    'key' => $this->l('Reference Code'),
-                    'value' => $order->getUniqReference()
-                ]
-            ],
+            'comment' => $shop_name . "#" . $order_reference_code,
 
         );
         $arr_json = json_encode($arr);
